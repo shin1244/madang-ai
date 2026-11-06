@@ -1,0 +1,11 @@
+# 학습 결과, 모델, 데이터는 git에 넣지 않습니다 (크기가 금방 커짐)
+runs/
+data/
+*.pt
+*.onnx
+*.bin
+__pycache__/
+.venv/
+venv/
+node_modules/
+*.cpuprofile
