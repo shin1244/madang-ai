@@ -22,7 +22,7 @@ python boardmadang/trainer/train.py bench/games/c4-4x4 $common --seed 1 --search
 python bench/grade.py runs/c4-4x4.bin runs/*/model.pt
 ```
 
-`--fast-sims`는 PR #32에 있으므로, 합치기 전에는 submodule을 그 브랜치로 바꿔서 돌립니다.
+`--fast-sims`는 PR #32로 보드마당에 들어갔고, submodule이 그 커밋(`d88b79d`) 이후를 가리킵니다.
 
 | 설정 | 시드 | 반복 | 판 | 남긴 국면 | 최선의 수 | 가치 오차 | 승·무·패 맞힘 |
 |---|---|---|---|---|---|---|---|
