@@ -75,6 +75,8 @@ python bench/grade.py runs/c4-4x4.bin runs/c4-base/model.pt
 
 `bench/dump.mjs`는 게임 코드를 격리 없이 돌리므로 이 저장소의 벤치마크 게임에만 씁니다.
 
+지금까지 잰 것은 [docs/experiments.md](docs/experiments.md)에 있습니다.
+
 ## 라이선스
 
 - **이 저장소의 코드**: [MIT](LICENSE). 상업적으로도 자유롭게 쓸 수 있고, 저작권 표시(원본이 이 저장소라는 것)만 남기면 됩니다.
