@@ -20,6 +20,11 @@
 - [Targeted Search Control in AlphaZero](https://arxiv.org/abs/2302.12359) (Go-Exploit, AAMAS 2023). 자기대국을 시작 판이 아니라 지난 판들의 국면에서 시작합니다.
 - [Improving AlphaZero Using Monte-Carlo Graph Search](https://ojs.aaai.org/index.php/ICAPS/article/view/15952) (ICAPS 2021). 다른 수순으로 같은 판에 오면 탐색 통계를 공유합니다.
 - [Scaling Scaling Laws with Board Games](https://arxiv.org/abs/2104.03113) (Jones 2021). 판이 커지면 필요한 계산이 지수적으로 늘고, 학습 계산과 대국 때의 탐색을 서로 바꿀 수 있습니다.
+- [Mastering the game of Go with deep neural networks and tree search](https://www.nature.com/articles/nature16961) (AlphaGo, 2016). 가치 신경망이 판을 외우는 문제:
+  한 판의 국면을 모두 쓰면 학습 0.19 / 시험 0.37로 벌어지고, 한 판에서 국면 하나만 뽑으니 0.226 / 0.234가 됐습니다.
+- [MiniZero](https://arxiv.org/abs/2310.11305) (2023). 작은 예산의 AlphaZero, MuZero 비교. 8×8 오델로에서 같은 시간이면 Gumbel 2~16번이 AlphaZero 200번과 비슷하거나 낫습니다.
+- [MuZero](https://arxiv.org/abs/1911.08265) (2019). Reanalyze에서 가치가 과적합하지 않도록 가치 손실 가중치를 0.25로 둡니다.
+- [Lessons from AlphaZero, part 4: Improving the Training Target](https://medium.com/oracledevs/lessons-from-alphazero-part-4-improving-the-training-target-6efba2e71628) (Oracle, 2018). Connect 4에서 가치 정답을 승패(z)와 탐색 평가(q)의 평균으로 둡니다 (`--value-mix`).
 
 ## 주사위와 숨긴 정보
 
