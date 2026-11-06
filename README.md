@@ -79,5 +79,6 @@ python bench/grade.py runs/c4-4x4.bin runs/c4-base/model.pt
 
 - **이 저장소의 코드**: [MIT](LICENSE). 상업적으로도 자유롭게 쓸 수 있고, 저작권 표시(원본이 이 저장소라는 것)만 남기면 됩니다.
 - **공개하는 모델 파일**: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.ko). 상업적으로 쓸 수 있고, 출처만 밝히면 됩니다.
-- **submodule `boardmadang/`**: 그 저장소의 라이선스를 따릅니다. `sdk/`와 `games/`는 MIT이고, 이 저장소가 불러 쓰는 `trainer/`는 AGPL-3.0입니다
-  ([LICENSING.md](https://github.com/shin1244/boardmadang/blob/main/LICENSING.md)).
+- **submodule `boardmadang/`**: 그 저장소의 라이선스를 따릅니다. 이 저장소가 쓰는 `sdk/`, `games/`, `trainer/`는 MIT이고,
+  쓰지 않는 `server/`와 `web/`만 AGPL-3.0입니다 ([LICENSING.md](https://github.com/shin1244/boardmadang/blob/main/LICENSING.md)).
+  그래서 이 저장소는 통째로 상업적으로 쓸 수 있습니다.
