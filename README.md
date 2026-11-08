@@ -55,6 +55,10 @@
 | `c3-4x4` | 4×4, 중력, 3목 | 65,757 | 선공 승 |
 | `c4-4x4` | 4×4, 중력, 4목 | 304,575 | 무승부 |
 | `c3-4x5` | 4행 × 5열, 중력, 3목 | 1,062,739 | 선공 승 |
+| `m3-4x4` | 4×4, 중력, 3목을 만들면 짐 (`c3-4x4`의 미제르. 판과 관측이 같고 뜻만 반대) | 65,757 | 후공 승 |
+| `othello-4x4` | 4×4 오델로 (둘 곳이 없으면 차례가 저절로 넘어감) | 79,791 | 후공 승 |
+| `go-5x5` | 5×5 바둑 (Tromp-Taylor 규칙, 단순 패, 덤 7.5) | 너무 많음 | 흑 승 (알려진 결과). 모델끼리 대국으로 비교 |
+| `shogi-3x4` | 3×4 판 위에서 기물을 옮기고, 잡은 기물을 다시 놓는 작은 장기 (십이장기와 같은 규칙. 위아래 한 줄씩은 손). 체스 기반 묶음용 | 너무 많음 | 모름. 모델끼리 대국으로 비교 |
 
 ```bash
 git clone --recurse-submodules https://github.com/shin1244/madang-ai
@@ -76,6 +80,29 @@ python bench/grade.py runs/c4-4x4.bin runs/c4-base/model.pt
 | class | 가치 예측을 승, 무, 패로 나눴을 때 정답과 같은 비율 |
 
 `bench/dump.mjs`는 게임 코드를 격리 없이 돌리므로 이 저장소의 벤치마크 게임에만 씁니다.
+
+## 공통 모델 (여러 게임 함께 학습)
+
+신경망 하나로 여러 게임을 함께 학습합니다 ([docs/plan.md](docs/plan.md)의 2단계). 게임마다 보드마당의 자기대국 워커를 띄우고,
+몸통은 같이 쓰며 게임별 입력층·게임 벡터·특수 행동 머리만 따로 둡니다 ([madang/net.py](madang/net.py)).
+
+```bash
+# 3게임 함께 15분 (게임마다 5분꼴). GPU가 보이면 GPU로 계산합니다
+python -m madang.train bench/games/c3-4x4 bench/games/c4-4x4 bench/games/c3-4x5 --minutes 15 --out runs/joint3
+
+# 게임마다 채점. 공통 모델은 .bin에 적힌 게임의 경로로 채점합니다 (예전에 만든 .bin은 bench/dump.mjs로 다시 만듦)
+python bench/grade.py runs/c4-4x4.bin runs/joint3/model.pt
+
+# 정답이 없는 게임(바둑 5×5)은 두 모델을 서로 두게 해서 비교합니다 (공통 모델이든 게임 하나짜리든)
+python -m madang.versus bench/games/go-5x5 runs/joint/model.pt runs/alone/model.pt --games 200
+
+# 테스트 (신경망과 학습, 벤치마크 게임 규칙)
+python -m unittest discover -s madang -t .
+npm test
+```
+
+`madang/train.py`는 모듈로 실행합니다(`python -m`). 보드마당의 `train.py`, `net.py`와 이름이 같아서 스크립트로 실행하면 이 폴더의 것을 잘못 불러옵니다.
+게임 하나만 주면 보드마당 학습기와 같은 설정·시드로 돌아서, 구현이 결과를 바꾸지 않았는지 비교할 수 있습니다.
 
 지금까지 잰 것은 [docs/experiments.md](docs/experiments.md)에 있습니다.
 
