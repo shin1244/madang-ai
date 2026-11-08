@@ -6,6 +6,7 @@
 // 국면이 많으면 고정 시드로 섞어 n개만 남깁니다. 우리가 만든 벤치마크 게임에만 씁니다 (게임 코드를 이 프로세스에서 그대로 돌림).
 //
 // 파일: [u32 머리 길이][머리 JSON][planes f32][legal u8][best u8][value f32][choice u8]
+//   머리: { n, channels, rows, cols, A, game, channelNames }
 //   choice는 둔 수에 따라 결과가 갈리는 국면 (가장 좋은 수가 따로 있음)
 
 import { writeFileSync } from 'node:fs';
@@ -45,7 +46,10 @@ cases.forEach((e, i) => {
   choice[i] = e.best.length < e.moves ? 1 : 0;
 });
 
-const head = Buffer.from(JSON.stringify({ n: cases.length, channels: env.channels, rows: env.rows, cols: env.cols, A }));
+// game과 channelNames는 채점할 때 모델이 이 게임의 것인지 보는 데 씁니다 (공통 모델은 game으로 경로를 고름)
+const head = Buffer.from(JSON.stringify({
+  n: cases.length, channels: env.channels, rows: env.rows, cols: env.cols, A, game: env.game.id, channelNames: env.channelNames(),
+}));
 const len = Buffer.alloc(4);
 len.writeUInt32LE(head.length);
 const bytes = (a) => Buffer.from(a.buffer, a.byteOffset, a.byteLength);
