@@ -9,3 +9,5 @@ __pycache__/
 venv/
 node_modules/
 *.cpuprofile
+# 사이트에 올릴 AI 파일 (madang/export.py가 씀)
+exports/
