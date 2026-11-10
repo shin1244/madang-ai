@@ -150,6 +150,20 @@ test('shogi-3x4: a pawn reaching the far row promotes, drops cannot go on the fa
   assert.deepEqual(dropped.hand[0], [0, 0, 0]);
 });
 
+test('shogi-3x4: the same position for the third time is a draw (pieces, hands and whose turn)', () => {
+  // 양쪽 장이 한 칸 나갔다 돌아오기: 네 수마다 시작 판으로 돌아옵니다
+  const shuffle = (s) => [[[4, 2], [3, 2]], [[1, 0], [2, 0]], [[3, 2], [4, 2]], [[2, 0], [1, 0]]].reduce((t, [a, b]) => shMove(t, a, b), s);
+  let s = shuffle(sh.setup());
+  assert.equal(s.over, false, 'the second time is not a draw yet');
+  s = shuffle(s);
+  assert.deepEqual(sh.result(s, 'en'), { winner: null, reason: 'Same position three times' });
+  assert.equal(sh.turn(s), null);
+  assert.equal(sh.view(s, 0, 'ko').message, '무승부 (같은 판이 세 번 나옴)');
+  // 손이 다르면 다른 판: 자를 잡아 손에 넣은 판은 따로 셉니다
+  const t = shMove(sh.setup(), [3, 1], [2, 1]);
+  assert.equal(Object.keys(t.seen).length, 2);
+});
+
 test('shogi-3x4: a king that reaches the far row and survives a turn wins, a captured king loses', () => {
   // 흰 왕이 1행 0열로 들어감. 검은 왕(1행 2열)은 닿지 않음 → 검은 쪽이 아무 수나 두면 흰 쪽 승
   let s = shMove(shogiState(['...', '..k', 'K..', '...', '...', '...']), [2, 0], [1, 0]);

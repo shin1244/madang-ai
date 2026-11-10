@@ -6,6 +6,7 @@
 //   자 = P: 앞으로 한 칸           후 = Q: 자가 상대 끝줄에 닿으면 바뀜. 대각선 뒤 두 방향만 빼고 한 칸
 // 잡은 기물은 내 손에 들어오고(후는 자로 돌아옴), 내 차례에 기물을 옮기는 대신 빈칸에 놓을 수 있습니다. 상대 끝줄에는 놓을 수 없습니다.
 // 이기는 방법: 상대 왕을 잡거나, 내 왕이 상대 끝줄에 들어가 상대 차례가 지나도록 잡히지 않음.
+// 무승부: 같은 판(판의 기물, 양쪽 손, 둘 차례)이 세 번째 나오거나, 300수 안에 끝나지 않음.
 //
 // 판은 6행 × 3열입니다. 0행은 후공의 손, 1~4행이 판, 5행은 선공의 손입니다. 칸 번호는 i = row * 3 + col.
 // 손의 칸은 열마다 기물 하나 (0열 자, 1열 상, 2열 장)이고, 둘 이상이면 개수를 적습니다.
@@ -33,18 +34,25 @@ function steps(type, f) {
 
 const TEXT = {
   ko: {
-    reason: { capture: '왕을 잡음', try: '왕이 상대 끝줄에서 버팀', 'no-moves': '상대가 둘 수 없음' },
+    reason: { capture: '왕을 잡음', try: '왕이 상대 끝줄에서 버팀', 'no-moves': '상대가 둘 수 없음', repetition: '같은 판이 세 번 나옴' },
     won: (why) => `이겼습니다! (${why})`,
     lost: (why) => `졌습니다 (${why})`,
+    draw: (why) => `무승부 (${why})`,
     theirTurn: '상대 차례',
     pick: '움직일 기물이나 놓을 포로를 고르세요',
     move: '갈 곳을 고르세요',
     drop: '놓을 빈칸을 고르세요 (상대 끝줄은 안 됨)',
   },
   en: {
-    reason: { capture: 'King captured', try: 'King held the far row', 'no-moves': 'Opponent has no move' },
+    reason: {
+      capture: 'King captured',
+      try: 'King held the far row',
+      'no-moves': 'Opponent has no move',
+      repetition: 'Same position three times',
+    },
     won: (why) => `You won! (${why})`,
     lost: (why) => `You lost (${why})`,
+    draw: (why) => `Draw (${why})`,
     theirTurn: "Opponent's turn",
     pick: 'Choose a piece to move or a captured piece to drop',
     move: 'Choose a square',
@@ -67,9 +75,17 @@ const click = (i) => ({ kind: 'click', row: rowOf(i), col: colOf(i) });
  *   last: number[],
  *   over: boolean,
  *   winner: 0 | 1 | null,
- *   reason: 'capture' | 'try' | 'no-moves' | null,
+ *   reason: 'capture' | 'try' | 'no-moves' | 'repetition' | null,
+ *   seen: Record<string, number>, // 판(positionKey)마다 나온 횟수. 세 번째면 무승부
  * }} State
  */
+
+/** 같은 판인지 가리는 열쇠: 둘 차례 + 판의 기물(선공은 대문자, 후공은 소문자, 빈칸은 .) + 양쪽 손의 개수 */
+function positionKey(board, hand, turn) {
+  let key = String(turn);
+  for (const p of board) key += p ? (p[0] === 'w' ? p[1] : p[1].toLowerCase()) : '.';
+  return `${key}${hand[0].join('')}${hand[1].join('')}`;
+}
 
 function setup() {
   const board = Array(ROWS * COLS).fill(null);
@@ -82,7 +98,9 @@ function setup() {
   board[idx(1, 1)] = 'bK';
   board[idx(1, 0)] = 'bR';
   board[idx(2, 1)] = 'bP';
-  return { board, hand: [[0, 0, 0], [0, 0, 0]], turn: 0, selected: null, last: [], over: false, winner: null, reason: null };
+  const hand = [[0, 0, 0], [0, 0, 0]];
+  const seen = { [positionKey(board, hand, 0)]: 1 };
+  return { board, hand, turn: 0, selected: null, last: [], over: false, winner: null, reason: null, seen };
 }
 
 /** player가 둘 수 있는 수 { from, to }. from이 손의 칸이면 놓기 */
@@ -137,6 +155,12 @@ function apply(state, m) {
   const theirKing = board.indexOf(`${SIDE[opp]}K`);
   if (rowOf(theirKing) === HOME[player]) return end(opp, 'try');
   if (movesOf(s, opp).length === 0) return end(player, 'no-moves');
+  // 같은 판(판의 기물, 양쪽 손, 둘 차례)이 세 번째 나오면 무승부입니다. 잡은 기물이 다시 들어오는 게임이라
+  // 양쪽이 같은 수를 오가면 끝나지 않기 때문입니다
+  const key = positionKey(board, hand, opp);
+  const times = (state.seen?.[key] ?? 0) + 1;
+  s.seen = { ...state.seen, [key]: times };
+  if (times >= 3) return end(null, 'repetition');
   return s;
 }
 
@@ -194,7 +218,8 @@ function view(state, player, lang = 'ko') {
   let message;
   if (state.over) {
     const why = text.reason[state.reason];
-    message = state.winner === player ? text.won(why) : text.lost(why);
+    if (state.winner === null) message = text.draw(why);
+    else message = state.winner === player ? text.won(why) : text.lost(why);
   } else if (!myTurn) message = text.theirTurn;
   else if (state.selected === null) message = text.pick;
   else message = rowOf(state.selected) === HAND_ROW[player] ? text.drop : text.move;
